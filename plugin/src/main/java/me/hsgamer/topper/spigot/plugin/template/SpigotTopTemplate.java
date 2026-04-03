@@ -280,15 +280,13 @@ public class SpigotTopTemplate extends TopPlayerNumberTemplate implements Loadab
                 case "top_size":
                     return QueryResult.handled(String.valueOf(snap.getSnapshot().size()));
                 case "value": {
-                    if (uuid == null) return QueryResult.handled(display.getDisplayNullValue());
                     String fmt = split.length > 1 ? split[1] : "";
-                    Double val = agent.getHolder().getEntry(uuid)
+                    Double val = uuid == null ? null : agent.getHolder().getEntry(uuid)
                             .map(me.hsgamer.topper.data.core.DataEntry::getValue).orElse(null);
                     return QueryResult.handled(display.getDisplayValue(val, fmt));
                 }
                 case "value_raw": {
-                    if (uuid == null) return QueryResult.handled(display.getDisplayNullValue());
-                    Double val = agent.getHolder().getEntry(uuid)
+                    Double val = uuid == null ? null : agent.getHolder().getEntry(uuid)
                             .map(me.hsgamer.topper.data.core.DataEntry::getValue).orElse(null);
                     return QueryResult.handled(display.getDisplayValue(val, "raw"));
                 }
