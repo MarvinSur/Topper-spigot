@@ -14,8 +14,13 @@ public enum TimePeriod {
     WEEKLY {
         @Override
         public ZonedDateTime nextReset(ZonedDateTime now) {
-            return now.with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+            ZonedDateTime candidate = now.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
                     .truncatedTo(ChronoUnit.DAYS);
+            // If candidate is today-midnight and we are already past it, move to next Monday
+            if (!candidate.isAfter(now)) {
+                candidate = candidate.plusWeeks(1);
+            }
+            return candidate;
         }
 
         @Override

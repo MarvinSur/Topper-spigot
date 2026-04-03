@@ -81,8 +81,10 @@ public class TimedAgent<K> implements Agent, DataEntryAgent<K, Double>, Runnable
 
     @Override
     public void run() {
+        // checkReset FIRST: clears holder and queues before snapshot reads them
         checkReset();
         persist(false);
+        // snapshot.run LAST: reads clean holder state after any reset
         snapshot.run();
     }
 
@@ -102,6 +104,7 @@ public class TimedAgent<K> implements Agent, DataEntryAgent<K, Double>, Runnable
         double updated = current + delta;
 
         holder.getOrCreateEntry(key).setValue(updated);
+        // Capture reference BEFORE potential swap in persist() to avoid losing the update
         storeMap.get().merge(key, updated, Double::max);
     }
 
