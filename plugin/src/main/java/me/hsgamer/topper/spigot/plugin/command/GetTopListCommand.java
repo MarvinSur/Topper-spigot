@@ -51,15 +51,30 @@ public class GetTopListCommand extends Command {
 
         int fromIndex = 1;
         int toIndex   = 10;
-        TimePeriod period = null; // null = alltime
+        TimePeriod period = null;    // null = alltime
+        boolean periodExplicit = false; // true = user typed a period arg
 
-        // Parse numeric args then optional period string
-        List<String> numArgs    = new ArrayList<>();
-        String       periodArg  = null;
+        // Walk args[1..] — collect numeric args and detect period keyword
+        List<String> numArgs = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
             TimePeriod p = TimePeriod.fromString(args[i]);
-            if (p != null) { periodArg = args[i]; period = p; }
-            else            numArgs.add(args[i]);
+            if (p != null) {
+                period = p;
+                periodExplicit = true;
+            } else if (args[i].equalsIgnoreCase("alltime")) {
+                period = null;
+                periodExplicit = true;
+            } else {
+                // Must be a number; reject anything else
+                try {
+                    Integer.parseInt(args[i]);
+                    numArgs.add(args[i]);
+                } catch (NumberFormatException e) {
+                    sendMessage(sender, "&cUnknown argument: &e" + args[i]
+                            + "&c. Expected a number or: alltime, weekly, monthly");
+                    return false;
+                }
+            }
         }
 
         try {
@@ -79,13 +94,19 @@ public class GetTopListCommand extends Command {
             return false;
         }
 
-        // Build the display line source (alltime or timed)
+        // Build display line
         SnapshotDisplayLine<UUID, Double> displayLine = buildDisplayLine(topHolder, period);
         if (displayLine == null) {
-            sendMessage(sender, "&cTimed period '" + periodArg + "' is not enabled for this holder.");
+            String periodName = period != null ? period.id() : "alltime";
+            sendMessage(sender, "&cPeriod &e" + periodName + "&c is not enabled for holder &e" + topHolder.getName() + "&c.");
             return false;
         }
 
+        // ── Header ────────────────────────────────────────────────────────────
+        String periodLabel = period != null ? period.id().toUpperCase() : "ALLTIME";
+        sendMessage(sender, "&6&l[ TOP " + topHolder.getName().toUpperCase() + " - " + periodLabel + " ]");
+
+        // ── List ──────────────────────────────────────────────────────────────
         final SnapshotDisplayLine<UUID, Double> dl = displayLine;
         List<String> topList = IntStream.rangeClosed(fromIndex, toIndex)
                 .mapToObj(dl::display)
@@ -100,12 +121,11 @@ public class GetTopListCommand extends Command {
     }
 
     /**
-     * Returns a SnapshotDisplayLine backed by the alltime or timed snapshot.
-     * Returns null if the requested period is not enabled for this holder.
+     * Returns a SnapshotDisplayLine for the given holder + period.
+     * Returns null if the timed period is not enabled for this holder.
      */
-    private SnapshotDisplayLine<UUID, Double> buildDisplayLine(NumberTopHolder topHolder, TimePeriod period) {
+    private SnapshotDisplayLine<UUID, Double> buildDisplayLine(NumberTopHolder topHolder, @Nullable TimePeriod period) {
         if (period == null) {
-            // alltime — original behaviour
             return new SpigotTopDisplayLine(topHolder);
         }
 
