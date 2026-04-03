@@ -2,6 +2,7 @@ package me.hsgamer.topper.spigot.plugin.template;
 
 import me.hsgamer.hscore.common.CollectionUtils;
 import me.hsgamer.topper.agent.update.UpdateAgent;
+import me.hsgamer.topper.spigot.plugin.timed.TimePeriod;
 import me.hsgamer.topper.template.topplayernumber.holder.NumberTopHolder;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -20,6 +21,26 @@ public class SpigotTopHolderSettings extends NumberTopHolder.MapSettings {
 
     public String defaultLine() {
         return Objects.toString(map.get("line"), null);
+    }
+
+    /**
+     * Returns enabled timed periods from config.
+     * Config example:
+     * <pre>
+     * timed:
+     *   - weekly
+     *   - monthly
+     * </pre>
+     */
+    public List<TimePeriod> timedPeriods() {
+        Object raw = map.get("timed");
+        if (!(raw instanceof List)) return Collections.emptyList();
+        List<TimePeriod> result = new ArrayList<>();
+        for (Object item : (List<?>) raw) {
+            TimePeriod p = TimePeriod.fromString(Objects.toString(item, ""));
+            if (p != null) result.add(p);
+        }
+        return result;
     }
 
     @Override
