@@ -1,15 +1,23 @@
 package me.hsgamer.topper.spigot.plugin;
 
-import io.github.projectunified.minelib.plugin.base.BasePlugin;
-import io.github.projectunified.minelib.plugin.permission.PermissionComponent;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 
-public final class Permissions extends PermissionComponent {
+import java.util.Arrays;
+import java.util.List;
+
+public final class Permissions implements Loadable {
     public static final Permission TOP = new Permission("topper.top", PermissionDefault.OP);
     public static final Permission RELOAD = new Permission("topper.reload", PermissionDefault.OP);
 
-    public Permissions(BasePlugin plugin) {
-        super(plugin);
+    private final TopperPlugin plugin;
+
+    public Permissions(TopperPlugin plugin) {
+        this.plugin = plugin;
+    }
+
+    public List<Permission> getPermissions() {
+        return Arrays.asList(TOP, RELOAD);
     }
 }

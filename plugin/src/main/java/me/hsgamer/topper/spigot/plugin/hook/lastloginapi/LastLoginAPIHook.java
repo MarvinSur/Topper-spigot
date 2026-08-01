@@ -2,7 +2,7 @@ package me.hsgamer.topper.spigot.plugin.hook.lastloginapi;
 
 import com.alessiodp.lastloginapi.api.interfaces.LastLoginAPI;
 import com.alessiodp.lastloginapi.api.interfaces.LastLoginPlayer;
-import io.github.projectunified.minelib.plugin.base.Loadable;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.spigot.plugin.TopperPlugin;
 import me.hsgamer.topper.spigot.plugin.template.SpigotTopTemplate;
 

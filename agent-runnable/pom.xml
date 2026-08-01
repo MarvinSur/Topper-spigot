@@ -16,10 +16,5 @@
             <artifactId>topper-agent-core</artifactId>
             <version>${topper.version}</version>
         </dependency>
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-scheduler-common</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
     </dependencies>
 </project>

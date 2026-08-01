@@ -4,7 +4,7 @@ import io.github.projectunified.faststats.bukkit.BukkitPlatform;
 import io.github.projectunified.faststats.core.Metric;
 import io.github.projectunified.faststats.gson.GsonSerializer;
 import io.github.projectunified.faststats.net.NetSubmitter;
-import io.github.projectunified.minelib.plugin.base.Loadable;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.spigot.plugin.TopperPlugin;
 import me.hsgamer.topper.spigot.plugin.template.SpigotTopTemplate;
 import org.bstats.charts.SingleLineChart;

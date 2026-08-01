@@ -1,8 +1,6 @@
 package me.hsgamer.topper.spigot.plugin.template;
 
-import io.github.projectunified.minelib.plugin.base.Loadable;
-import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
-import io.github.projectunified.minelib.scheduler.global.GlobalScheduler;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.agent.core.Agent;
 import me.hsgamer.topper.agent.core.DataEntryAgent;
 import me.hsgamer.topper.query.core.QueryResult;
@@ -86,7 +84,7 @@ public class SpigotTopTemplate extends TopPlayerNumberTemplate implements Loadab
     }
 
     private Agent createTask(Runnable runnable, boolean async, long delay) {
-        return new SpigotRunnableAgent(runnable, async ? AsyncScheduler.get(plugin) : GlobalScheduler.get(plugin), delay);
+        return new SpigotRunnableAgent(runnable, plugin, async, delay);
     }
 
     @Override
@@ -121,13 +119,13 @@ public class SpigotTopTemplate extends TopPlayerNumberTemplate implements Loadab
             @Override
             public void start() {
                 if (plugin.get(MainConfig.class).isLoadAllOfflinePlayers()) {
-                    GlobalScheduler.get(plugin).run(() -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
                         for (OfflinePlayer player : plugin.getServer().getOfflinePlayers()) {
                             holder.getOrCreateEntry(player.getUniqueId());
                         }
                     });
                 } else {
-                    GlobalScheduler.get(plugin).run(() -> {
+                    Bukkit.getScheduler().runTask(plugin, () -> {
                         for (Player player : plugin.getServer().getOnlinePlayers()) {
                             holder.getOrCreateEntry(player.getUniqueId());
                         }
@@ -142,7 +140,7 @@ public class SpigotTopTemplate extends TopPlayerNumberTemplate implements Loadab
         super.enable();
         getEntryConsumeManager().addConsumer(
                 (context) ->
-                        AsyncScheduler.get(plugin).run(
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin,
                                 () ->
                                         Bukkit.getPluginManager().callEvent(new GenericEntryUpdateEvent(
                                                         context.group,

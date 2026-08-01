@@ -1,7 +1,5 @@
 package me.hsgamer.topper.spigot.plugin;
 
-import io.github.projectunified.minelib.plugin.base.BasePlugin;
-import io.github.projectunified.minelib.plugin.command.CommandComponent;
 import me.hsgamer.hscore.bukkit.config.BukkitConfig;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.hscore.checker.spigotmc.SpigotVersionChecker;
@@ -9,6 +7,7 @@ import me.hsgamer.hscore.config.proxy.ConfigGenerator;
 import me.hsgamer.hscore.database.Setting;
 import me.hsgamer.hscore.database.client.sql.SqlClient;
 import me.hsgamer.hscore.database.client.sql.java.JavaSqlClient;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.spigot.plugin.command.GetTopListCommand;
 import me.hsgamer.topper.spigot.plugin.command.ReloadCommand;
 import me.hsgamer.topper.spigot.plugin.config.MainConfig;
@@ -21,14 +20,36 @@ import me.hsgamer.topper.spigot.plugin.manager.ValueProviderManager;
 import me.hsgamer.topper.spigot.plugin.template.SpigotTopTemplate;
 import me.hsgamer.topper.spigot.template.storagesupplier.SpigotStorageSupplierTemplate;
 import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.permissions.Permission;
+import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.Arrays;
-import java.util.List;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.logging.Level;
 
-public class TopperPlugin extends BasePlugin {
-    @Override
-    protected List<Object> getComponents() {
+public class TopperPlugin extends JavaPlugin {
+    private final Map<Class<?>, Object> componentMap = new LinkedHashMap<>();
+    private final List<Object> componentList = new ArrayList<>();
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(Class<T> clazz) {
+        Object obj = componentMap.get(clazz);
+        if (obj == null) {
+            for (Object component : componentList) {
+                if (clazz.isInstance(component)) {
+                    componentMap.put(clazz, component);
+                    return (T) component;
+                }
+            }
+            throw new IllegalStateException("Component not found: " + clazz.getName());
+        }
+        return (T) obj;
+    }
+
+    private List<Object> getComponents() {
         return Arrays.asList(
                 ConfigGenerator.newInstance(MainConfig.class, new BukkitConfig(this)),
                 ConfigGenerator.newInstance(MessageConfig.class, new BukkitConfig(this, "messages.yml")),
@@ -47,10 +68,6 @@ public class TopperPlugin extends BasePlugin {
                 new SpigotTopTemplate(this),
 
                 new Permissions(this),
-                new CommandComponent(this,
-                        new ReloadCommand(this),
-                        new GetTopListCommand(this)
-                ),
                 new JoinListener(this),
 
                 new MetricsManager(this)
@@ -58,13 +75,56 @@ public class TopperPlugin extends BasePlugin {
     }
 
     @Override
-    public void load() {
+    public void onLoad() {
+        componentList.addAll(getComponents());
+
+        // Register commands
+        try {
+            GetTopListCommand getTopListCommand = new GetTopListCommand(this);
+            ReloadCommand reloadCommand = new ReloadCommand(this);
+            getCommandMap().register(getDescription().getName().toLowerCase(), getTopListCommand);
+            getCommandMap().register(getDescription().getName().toLowerCase(), reloadCommand);
+        } catch (Exception e) {
+            getLogger().log(Level.WARNING, "Failed to register commands", e);
+        }
+
+        // Load phase
+        for (Object component : componentList) {
+            if (component instanceof Loadable) {
+                ((Loadable) component).load();
+            }
+        }
+
         MessageUtils.setPrefix(get(MessageConfig.class)::getPrefix);
         get(SpigotTopTemplate.class).getNameProviderManager().setDefaultNameProvider(uuid -> Bukkit.getOfflinePlayer(uuid).getName());
     }
 
     @Override
-    public void enable() {
+    public void onEnable() {
+        // Enable phase
+        for (Object component : componentList) {
+            if (component instanceof Loadable) {
+                ((Loadable) component).enable();
+            }
+            if (component instanceof Listener) {
+                Bukkit.getPluginManager().registerEvents((Listener) component, this);
+            }
+        }
+
+        // Register permissions
+        for (Object component : componentList) {
+            if (component instanceof Permissions) {
+                Permissions perms = (Permissions) component;
+                for (Permission permission : perms.getPermissions()) {
+                    try {
+                        Bukkit.getPluginManager().addPermission(permission);
+                    } catch (Exception ignored) {
+                        // Permission may already be registered
+                    }
+                }
+            }
+        }
+
         if (getDescription().getVersion().contains("SNAPSHOT")) {
             getLogger().warning("You are using the development version");
             getLogger().warning("This is not ready for production");
@@ -83,5 +143,28 @@ public class TopperPlugin extends BasePlugin {
                 }
             });
         }
+    }
+
+    @Override
+    public void onDisable() {
+        // Disable in reverse order
+        List<Object> reversed = new ArrayList<>(componentList);
+        Collections.reverse(reversed);
+        for (Object component : reversed) {
+            if (component instanceof Listener) {
+                HandlerList.unregisterAll((Listener) component);
+            }
+            if (component instanceof Loadable) {
+                ((Loadable) component).disable();
+            }
+        }
+        componentList.clear();
+        componentMap.clear();
+    }
+
+    private org.bukkit.command.CommandMap getCommandMap() throws Exception {
+        Field commandMapField = Bukkit.getServer().getClass().getDeclaredField("commandMap");
+        commandMapField.setAccessible(true);
+        return (org.bukkit.command.CommandMap) commandMapField.get(Bukkit.getServer());
     }
 }

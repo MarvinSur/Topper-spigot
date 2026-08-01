@@ -1,6 +1,6 @@
 package me.hsgamer.topper.spigot.plugin.hook.miniplaceholders;
 
-import io.github.projectunified.minelib.plugin.base.Loadable;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.query.core.QueryResult;
 import me.hsgamer.topper.query.forward.QueryForwardContext;
 import me.hsgamer.topper.spigot.plugin.TopperPlugin;

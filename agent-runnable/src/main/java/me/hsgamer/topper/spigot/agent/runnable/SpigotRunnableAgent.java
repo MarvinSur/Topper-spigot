@@ -1,24 +1,30 @@
 package me.hsgamer.topper.spigot.agent.runnable;
 
-import io.github.projectunified.minelib.scheduler.common.scheduler.Scheduler;
-import io.github.projectunified.minelib.scheduler.common.task.Task;
 import me.hsgamer.topper.agent.core.Agent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 
 public class SpigotRunnableAgent implements Agent {
     private final Runnable runnable;
-    private final Scheduler scheduler;
+    private final Plugin plugin;
+    private final boolean async;
     private final long interval;
-    private Task task;
+    private BukkitTask task;
 
-    public SpigotRunnableAgent(Runnable runnable, Scheduler scheduler, long interval) {
+    public SpigotRunnableAgent(Runnable runnable, Plugin plugin, boolean async, long interval) {
         this.runnable = runnable;
-        this.scheduler = scheduler;
+        this.plugin = plugin;
+        this.async = async;
         this.interval = interval;
     }
 
     @Override
     public void start() {
-        task = scheduler.runTimer(runnable, interval, interval);
+        if (async) {
+            task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, runnable, interval, interval);
+        } else {
+            task = plugin.getServer().getScheduler().runTaskTimer(plugin, runnable, interval, interval);
+        }
     }
 
     @Override

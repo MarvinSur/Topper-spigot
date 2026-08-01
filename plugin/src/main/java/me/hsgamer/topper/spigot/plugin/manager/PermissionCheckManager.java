@@ -1,6 +1,6 @@
 package me.hsgamer.topper.spigot.plugin.manager;
 
-import io.github.projectunified.minelib.plugin.base.Loadable;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

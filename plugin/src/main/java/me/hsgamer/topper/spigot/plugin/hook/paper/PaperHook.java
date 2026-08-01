@@ -1,6 +1,6 @@
 package me.hsgamer.topper.spigot.plugin.hook.paper;
 
-import io.github.projectunified.minelib.plugin.base.Loadable;
+import me.hsgamer.topper.spigot.plugin.base.Loadable;
 import me.hsgamer.topper.spigot.plugin.TopperPlugin;
 import me.hsgamer.topper.spigot.plugin.template.SpigotTopTemplate;
 

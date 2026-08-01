@@ -44,10 +44,7 @@
                                     <pattern>me.hsgamer.hscore</pattern>
                                     <shadedPattern>me.hsgamer.topper.spigot.plugin.lib.core</shadedPattern>
                                 </relocation>
-                                <relocation>
-                                    <pattern>io.github.projectunified.minelib</pattern>
-                                    <shadedPattern>me.hsgamer.topper.spigot.plugin.lib.minelib</shadedPattern>
-                                </relocation>
+
                                 <relocation>
                                     <pattern>org.bstats</pattern>
                                     <shadedPattern>me.hsgamer.topper.spigot.plugin.lib.bstats</shadedPattern>
@@ -229,31 +226,7 @@
             <version>${core.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-scheduler-global</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-scheduler-async</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-plugin-permission</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-plugin-command</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.projectunified</groupId>
-            <artifactId>minelib-plugin-listener</artifactId>
-            <version>${minelib.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>net.luckperms</groupId>
